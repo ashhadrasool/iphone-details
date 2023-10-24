@@ -38,7 +38,7 @@ def getUUIDs():
         print(f"An error occurred: {e}")
 
 def getDeviceDetails(uuid):
-    details = {}
+    details = {'uuid': uuid}
 
     csv_file = 'details.csv'
 
@@ -169,11 +169,12 @@ def writeToCSV(data):
         writer = csv.writer(file)
 
         if new:
-            writer.writerow(['Model', 'Storage', 'Color', 'iOS version', 'IMEI', 'Product Type', 'Sales Model', 'Region','Max Battery Life', 'Born On Date',  'Mobile Number'])
+            writer.writerow(['UUID', 'Model', 'Storage', 'Color', 'iOS version', 'IMEI', 'Product Type', 'Sales Model', 'Region','Max Battery Life', 'Born On Date',  'Mobile Number'])
 
 
         for row in data:
-            writer.writerow([row['model'], row['storage'], row['iosVersion'], row['imei'], row['productType'], row['salesModel'], row['region'], row['batteryHealth']])
+            writer.writerow([row['uuid'], row['model'], row['storage'], row['iosVersion'], row['imei'], row['productType'], row['salesModel'], row['region'], row['batteryHealth']])
+            print('added: '+row['uuid'])
 
 
 
