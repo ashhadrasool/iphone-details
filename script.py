@@ -169,7 +169,7 @@ def writeToCSV(data):
         writer = csv.writer(file)
 
         if new:
-            writer.writerow(['Model', 'Storage', 'Color', 'iOS version', 'IMEI', 'Product Type', 'Sales Model', 'Max Battery Life', 'Born On Date',  'Mobile Number'])
+            writer.writerow(['Model', 'Storage', 'Color', 'iOS version', 'IMEI', 'Product Type', 'Sales Model', 'Region','Max Battery Life', 'Born On Date',  'Mobile Number'])
 
 
         for row in data:
