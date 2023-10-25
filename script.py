@@ -3,21 +3,9 @@ import platform
 import os
 import csv
 
-system = platform.system()
-current_directory = os.getcwd()
-full_path = ''
-
-if system == "Darwin":
-    processor = platform.uname().processor
-    if 'arm' in processor:
-        full_path = os.path.join(current_directory, 'bin', 'mac', 'silicon')
-    else:
-        full_path = os.path.join(current_directory, 'bin', 'mac', 'intel')
-
-
 def getUUIDs():
     try:
-        script = os.path.join(full_path, 'idevice_id')
+        script = 'idevice_id'
         result = subprocess.run([script], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         if result.returncode == 0:
@@ -77,7 +65,7 @@ def getDeviceDetails(uuid):
         # print(csv_data)
 
     try:
-        command = os.path.join(full_path, 'ideviceinfo -u ' +uuid)
+        command = 'ideviceinfo -u ' +uuid
         result = subprocess.run([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         if result.returncode == 0:
@@ -103,7 +91,7 @@ def getDeviceDetails(uuid):
         details['color'] = csv_data[details['salesModel']]['Finish']
 
 
-        command = os.path.join(full_path, 'idevicediagnostics ioregentry AppleARMPMUCharger -u ' +uuid)
+        command = 'idevicediagnostics ioregentry AppleARMPMUCharger -u ' +uuid
         result = subprocess.run([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         batteryMaxCapacity = 1
@@ -117,15 +105,15 @@ def getDeviceDetails(uuid):
                     continue
                 if 'DesignCapacity' in line:
                     batteryMaxCapacity = int(lines[i+1].split('>')[1].split('<')[0])
-                elif 'AppleRawCurrentCapacity' in line:
+                elif 'nominalChargeCapacity' in line:
                     batteryCurrentCapacity = int(lines[i+1].split('>')[1].split('<')[0])
 
-            details['batteryHealth'] = int(batteryCurrentCapacity/batteryMaxCapacity*100)
+            details['batteryHealth'] = round(batteryCurrentCapacity/batteryMaxCapacity*100)
         else:
             print("Error running the script:")
             print(result.stderr)
 
-        command = os.path.join(full_path, 'ideviceinfo -q com.apple.disk_usage -u ' +uuid)
+        command = 'ideviceinfo -q com.apple.disk_usage -u ' +uuid
         result = subprocess.run([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         if result.returncode == 0:
@@ -164,7 +152,7 @@ def writeToCSV(data):
 
 
         for row in data:
-            writer.writerow([row['uuid'], row['model'], row['storage'], row['iosVersion'], row['imei'], row['productType'], row['salesModel'], row['region'], row['batteryHealth']])
+            writer.writerow([row['uuid'], row['model'],row['storage'], row['color'], row['iosVersion'], row['imei'], row['productType'], row['salesModel'], row['region'], row['batteryHealth']])
             print('added: '+row['uuid'])
 
 
