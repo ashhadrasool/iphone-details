@@ -105,7 +105,7 @@ def getDeviceDetails(uuid):
                     continue
                 if 'DesignCapacity' in line:
                     batteryMaxCapacity = int(lines[i+1].split('>')[1].split('<')[0])
-                elif 'nominalChargeCapacity' in line:
+                elif '>nominalChargeCapacity' in line:
                     batteryCurrentCapacity = int(lines[i+1].split('>')[1].split('<')[0])
 
             details['batteryHealth'] = round(batteryCurrentCapacity/batteryMaxCapacity*100)
@@ -148,7 +148,7 @@ def writeToCSV(data):
         writer = csv.writer(file)
 
         if new:
-            writer.writerow(['UUID', 'Model', 'Storage', 'Color', 'iOS version', 'IMEI', 'Product Type', 'Sales Model', 'Region','Max Battery Life', 'Born On Date',  'Mobile Number'])
+            writer.writerow(['UUID', 'Model', 'Storage', 'Color', 'iOS version', 'IMEI', 'Product Type', 'Sales Model', 'Region', 'Max Battery Life'])
 
 
         for row in data:
