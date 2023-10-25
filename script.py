@@ -4,20 +4,21 @@ import os
 import csv
 
 system = platform.system()
+current_directory = os.getcwd()
+full_path = ''
 
-# Replace 'your_shell_script.sh' with the path to your shell script
-shell_script = './your_shell_script.sh'
-
+if system == "Darwin":
+    processor = platform.uname().processor
+    if 'arm' in processor:
+        full_path = os.path.join(current_directory, 'bin', 'mac', 'silicon')
+    else:
+        full_path = os.path.join(current_directory, 'bin', 'mac', 'intel')
 
 
 def getUUIDs():
-    if system == "Darwin":
-        shell_script = './bin/mac/idevice_id'
-    elif system == "Windows":
-        raise Exception('not supported for windows')
     try:
-        # Run the shell script and capture its output
-        result = subprocess.run([shell_script], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        script = os.path.join(full_path, 'idevice_id')
+        result = subprocess.run([script], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         if result.returncode == 0:
             text = result.stdout
@@ -70,17 +71,13 @@ def getDeviceDetails(uuid):
                 lastGen = generation
             models = model.split(', ')
             for m in models:
-                # data['Model'] = m
                 data['Finish'] = finish
                 data['Generation'] = generation
                 csv_data[m] = data
         # print(csv_data)
 
     try:
-        if system == "Darwin":
-            command = './bin/mac/ideviceinfo -u '+uuid
-        elif system == "Windows":
-            raise Exception('not supported for windows')
+        command = os.path.join(full_path, 'ideviceinfo -u ' +uuid)
         result = subprocess.run([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         if result.returncode == 0:
@@ -106,10 +103,7 @@ def getDeviceDetails(uuid):
         details['color'] = csv_data[details['salesModel']]['Finish']
 
 
-        if system == "Darwin":
-            command = './bin/mac/idevicediagnostics ioregentry AppleARMPMUCharger -u '+uuid
-        elif system == "Windows":
-            raise Exception('not supported for windows')
+        command = os.path.join(full_path, 'idevicediagnostics ioregentry AppleARMPMUCharger -u ' +uuid)
         result = subprocess.run([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         batteryMaxCapacity = 1
@@ -131,10 +125,7 @@ def getDeviceDetails(uuid):
             print("Error running the script:")
             print(result.stderr)
 
-        if system == "Darwin":
-            command = './bin/mac/ideviceinfo -q com.apple.disk_usage -u '+uuid
-        elif system == "Windows":
-            raise Exception('not supported for windows')
+        command = os.path.join(full_path, 'ideviceinfo -q com.apple.disk_usage -u ' +uuid)
         result = subprocess.run([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         if result.returncode == 0:
