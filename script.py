@@ -1,5 +1,5 @@
+import math
 import subprocess
-import platform
 import os
 import csv
 
@@ -95,7 +95,7 @@ def getDeviceDetails(uuid):
         result = subprocess.run([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         batteryMaxCapacity = 1
-        batteryCurrentCapacity = 1
+        batteryCurrentCapacity = 5000
         if result.returncode == 0:
             text = result.stdout
             lines = text.split('\n')
@@ -105,13 +105,36 @@ def getDeviceDetails(uuid):
                     continue
                 if 'DesignCapacity' in line:
                     batteryMaxCapacity = int(lines[i+1].split('>')[1].split('<')[0])
-                elif '>nominalChargeCapacity' in line:
-                    batteryCurrentCapacity = int(lines[i+1].split('>')[1].split('<')[0])
+                elif '>nominalChargeCapacity' in line or '>NominalChargeCapacity' in line:
+                    val = int(lines[i+1].split('>')[1].split('<')[0])
+                    if batteryCurrentCapacity > val:
+                        batteryCurrentCapacity = val
 
-            details['batteryHealth'] = round(batteryCurrentCapacity/batteryMaxCapacity*100)
+            details['batteryHealth'] = min(100, math.ceil(batteryCurrentCapacity/batteryMaxCapacity*100))
         else:
-            print("Error running the script:")
-            print(result.stderr)
+            command = 'idevicediagnostics ioregentry AppleARMPMUCharger -u ' +uuid
+            result = subprocess.run([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+            if result.returncode == 0:
+                text = result.stdout
+
+                lines = text.split('\n')
+                for i, line in enumerate(lines):
+                    line = line.strip()
+                    if line == '':
+                        continue
+                    if 'DesignCapacity' in line:
+                        batteryMaxCapacity = int(lines[i+1].split('>')[1].split('<')[0])
+                    if '>nominalChargeCapacity' in line or '>NominalChargeCapacity' in line:
+                        val = int(lines[i+1].split('>')[1].split('<')[0])
+                        if batteryCurrentCapacity > val:
+                            batteryCurrentCapacity = val
+
+                details['batteryHealth'] = min(100, math.ceil(batteryCurrentCapacity/batteryMaxCapacity*100))
+            else:
+                print("Error running the script:")
+                print(result.stderr)
+
 
         command = 'ideviceinfo -q com.apple.disk_usage -u ' +uuid
         result = subprocess.run([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
