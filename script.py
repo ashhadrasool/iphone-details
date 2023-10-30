@@ -112,7 +112,7 @@ def getDeviceDetails(uuid):
 
             details['batteryHealth'] = min(100, math.ceil(batteryCurrentCapacity/batteryMaxCapacity*100))
         else:
-            command = 'idevicediagnostics ioregentry AppleARMPMUCharger -u ' +uuid
+            command = 'idevicediagnostics ioregentry AppleSmartBattery -u ' +uuid
             result = subprocess.run([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             if result.returncode == 0:
