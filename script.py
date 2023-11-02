@@ -14,8 +14,9 @@ def getUUIDs():
             # print(lines)
             uuids = []
             for line in lines:
-                uuid = line.split(' ')[0].strip()
-                if uuid != '':
+                result = line.split(' ')
+                uuid = result[0].strip()
+                if uuid != '' and (len(result) <2 or result[1]!='(Network)'):
                     uuids.append(uuid)
                     break
             return uuids
@@ -74,6 +75,8 @@ def getDeviceDetails(uuid):
             for line in lines:
                 if 'ModelNumber' in line:
                     details['salesModel'] = line.split(': ')[1]
+                    if details['salesModel'].startswith('N'):
+                        details['salesModel'] = 'M'+details['salesModel'][1:]
                 elif 'RegionInfo' in line:
                     details['region'] = line.split(': ')[1]
                 elif 'ProductType' in line:
@@ -183,6 +186,13 @@ def writeToCSV(data):
 uuids = getUUIDs()
 
 allDevices = []
+if len(uuids) == 0:
+    print('No connected devices')
+else:
+    print('Devices connected: ')
+    for uuid in uuids:
+        print(uuid)
+
 for uuid in uuids:
     details = getDeviceDetails(uuid)
     writeToCSV([details])
